@@ -1,0 +1,18 @@
+CREATE TABLE contributors(id TEXT PRIMARY KEY, public_code TEXT NOT NULL UNIQUE,nickname TEXT NOT NULL DEFAULT '',recovery_hash TEXT NOT NULL UNIQUE,status TEXT NOT NULL DEFAULT 'active',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE sessions(token_hash TEXT PRIMARY KEY, contributor_id TEXT NOT NULL REFERENCES contributors(id),expires_at INTEGER NOT NULL);
+CREATE TABLE bikes(id INTEGER PRIMARY KEY AUTOINCREMENT,operator TEXT NOT NULL DEFAULT 'YouBike',bike_number TEXT NOT NULL,bike_type TEXT,UNIQUE(operator,bike_number));
+CREATE TABLE ride_records(id INTEGER PRIMARY KEY AUTOINCREMENT,bike_id INTEGER NOT NULL REFERENCES bikes(id),author_id TEXT NOT NULL REFERENCES contributors(id),status TEXT NOT NULL DEFAULT 'draft',version INTEGER NOT NULL DEFAULT 0,next_version INTEGER NOT NULL DEFAULT 0,content TEXT NOT NULL,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX records_bike ON ride_records(bike_id,status,id DESC);
+CREATE INDEX records_author ON ride_records(author_id,id DESC);
+CREATE TABLE record_versions(record_id INTEGER NOT NULL REFERENCES ride_records(id),version INTEGER NOT NULL,content TEXT NOT NULL,PRIMARY KEY(record_id,version));
+CREATE TABLE publish_attempts(request_id TEXT PRIMARY KEY,author_id TEXT NOT NULL,record_id INTEGER NOT NULL REFERENCES ride_records(id),version INTEGER NOT NULL,state TEXT NOT NULL DEFAULT 'working',message TEXT,created_at INTEGER NOT NULL);
+CREATE UNIQUE INDEX active_publish ON publish_attempts(record_id) WHERE state='working';
+CREATE TABLE record_images(id INTEGER PRIMARY KEY AUTOINCREMENT, record_id INTEGER NOT NULL REFERENCES ride_records(id), content_version INTEGER NOT NULL, kind TEXT NOT NULL, object_key TEXT NOT NULL UNIQUE, visibility TEXT NOT NULL, mime_type TEXT NOT NULL,width INTEGER NOT NULL,height INTEGER NOT NULL,bytes INTEGER NOT NULL,status TEXT NOT NULL DEFAULT 'ready', template_version INTEGER NOT NULL DEFAULT 1, UNIQUE(record_id,content_version,kind));
+CREATE TABLE reports(id INTEGER PRIMARY KEY AUTOINCREMENT,record_id INTEGER NOT NULL REFERENCES ride_records(id),reason TEXT NOT NULL,details TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'open',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE admin_sessions(token_hash TEXT PRIMARY KEY,expires_at INTEGER NOT NULL);
+CREATE TABLE admin_actions(id INTEGER PRIMARY KEY AUTOINCREMENT,action TEXT NOT NULL,target_id TEXT,reason TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE rate_limit_buckets(key_hash TEXT NOT NULL,action TEXT NOT NULL,window_start INTEGER NOT NULL,count INTEGER NOT NULL,expires_at INTEGER NOT NULL,PRIMARY KEY(key_hash,action,window_start));
+CREATE TABLE site_settings(id INTEGER PRIMARY KEY CHECK(id=1),moderation_enabled INTEGER NOT NULL DEFAULT 0 CHECK(moderation_enabled IN (0,1)),updated_at TEXT NOT NULL);
+INSERT INTO site_settings VALUES(1,0,CURRENT_TIMESTAMP);
+CREATE TABLE moderation_checks(id INTEGER PRIMARY KEY AUTOINCREMENT,record_id INTEGER NULL,content_version INTEGER NOT NULL,result TEXT NOT NULL,model TEXT,policy_version TEXT NOT NULL,confidence REAL,error_code TEXT,created_at TEXT NOT NULL);
+CREATE TABLE moderation_usage(day TEXT PRIMARY KEY,count INTEGER NOT NULL);
