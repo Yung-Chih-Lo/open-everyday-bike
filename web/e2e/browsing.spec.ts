@@ -76,6 +76,22 @@ for (const width of [390, 1280]) {
     await expect(page.locator(".detail-copy header")).toContainText(
       "記錄者 RIDER123 · 2026.09.23"
     )
+    await expect(page.locator(".detail-grade [data-slot=badge]")).toHaveText(
+      "新竹市"
+    )
+    await expect(page.locator(".detail-image")).toHaveAttribute(
+      "src",
+      record.shareUrl
+    )
+    const score = page.locator(".score-summary > div").first()
+    const labelBox = (await score.locator("dt").boundingBox())!
+    const gradeBox = (await score.locator("dd").boundingBox())!
+    expect(gradeBox.x).toBeGreaterThan(labelBox.x)
+    expect(
+      Math.abs(
+        labelBox.y + labelBox.height / 2 - gradeBox.y - gradeBox.height / 2
+      )
+    ).toBeLessThan(2)
     const actions = page.getByLabel("紀錄操作")
     await expect(
       actions.getByRole("link", { name: "下載分享圖 ↓" })

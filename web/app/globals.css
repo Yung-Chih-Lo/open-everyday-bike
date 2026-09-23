@@ -736,11 +736,23 @@ input[type="range"] {
 .page-heading h1 { margin-bottom: 8px; }
 .page-heading .eyebrow { margin-bottom: 8px; }
 .detail-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; gap: 32px; }
-.detail-copy { padding: 28px; background: var(--card); border: 1px solid var(--border); border-radius: 24px; gap: 18px; }
-.detail-grade { font-size: 58px; }
+.detail-copy { padding: 28px; background: var(--card); border: 1px solid var(--border); border-radius: 18px; gap: 20px; }
+.detail-grade { font-size: 58px; gap: 18px; }
+.detail-grade > div { flex-shrink: 0; }
+.detail-grade [data-slot="badge"] { margin-left: auto; flex-shrink: 0; }
 .detail-grade .bike-link { line-height: 1.5; overflow-wrap: anywhere; }
-.score-summary { gap: 16px; padding: 18px 0; }
-.detail-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.score-summary { gap: 20px 0; padding: 24px 0; }
+.score-summary > div { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.score-summary > div:not(:nth-child(3n + 1)) { border-left: 1px solid var(--border); }
+.score-summary dt { font-size: 14px; }
+.score-summary dd { margin: 0; font-size: 24px; color: var(--foreground); }
+.detail-note-heading { display: flex; flex-direction: column; gap: 8px; }
+.detail-note-heading h2 { font-size: 17px; font-weight: 600; }
+.detail-note-heading p { font-size: 12px; overflow-wrap: anywhere; }
+.detail-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 4px; }
+.detail-actions > :not(.detail-report) { flex: 1; border-radius: 12px; }
+.detail-actions .detail-report { flex-basis: 100%; color: var(--destructive); font-weight: 400; text-decoration: underline; text-underline-offset: 4px; }
+.detail-disclaimer { border-top: 1px solid var(--border); padding-top: 16px; text-align: center; font-size: 12px; color: var(--muted-foreground); }
 .detail-actions > * { min-height: 44px; }
 .history-summary { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
 .history-summary h2 { font-size: 20px; }
@@ -751,6 +763,10 @@ input[type="range"] {
 }
 @media (max-width: 400px) {
   .detail-copy { padding: 18px; }
+  .detail-grade { gap: 10px; font-size: 44px; }
+  .detail-grade .bike-link { font-size: 15px; }
+  .score-summary > div { gap: 8px; }
+  .score-summary dd { font-size: 20px; }
   [aria-label="騎乘紀錄分頁"] ul { flex-wrap: wrap; justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) {

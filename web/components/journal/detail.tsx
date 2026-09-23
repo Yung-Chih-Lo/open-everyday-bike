@@ -81,9 +81,6 @@ export default function Detail() {
               )}
             </div>
             <article className="detail-copy">
-              <div className="flex justify-end">
-                <Badge variant="secondary">{data.record.content.city}</Badge>
-              </div>
               <div className="detail-grade">
                 <div>
                   <OverallGrade value={data.record.content.overallGrade} />
@@ -94,6 +91,7 @@ export default function Detail() {
                 >
                   車號 {data.record.content.bikeNumber} ↗
                 </Link>
+                <Badge variant="secondary">{data.record.content.city}</Badge>
               </div>
               <dl className="score-summary">
                 {scoreLabels.map((label, i) => (
@@ -103,7 +101,7 @@ export default function Detail() {
                   </div>
                 ))}
               </dl>
-              <header className="flex flex-col gap-2">
+              <header className="detail-note-heading">
                 <h2>騎乘筆記</h2>
                 <p className="muted text-sm">
                   記錄者 {data.record.authorCode} ·{" "}
@@ -111,9 +109,6 @@ export default function Detail() {
                 </p>
               </header>
               <p className="impression">{data.record.content.impression}</p>
-              <p className="muted text-sm">
-                歷史心得不代表車輛目前車況。每一次騎乘都可能有不同感受。
-              </p>
               <div className="detail-actions" aria-label="紀錄操作">
                 {data.record.shareUrl && (
                   <Button asChild>
@@ -134,7 +129,8 @@ export default function Detail() {
                   複製連結
                 </Button>
                 <Button
-                  variant="destructive"
+                  variant="link"
+                  className="detail-report"
                   aria-expanded={report}
                   aria-controls="report-form"
                   onClick={() => setReport((v) => !v)}
@@ -142,6 +138,7 @@ export default function Detail() {
                   回報這筆紀錄
                 </Button>
               </div>
+              <p className="detail-disclaimer">歷史心得不代表車輛目前車況。</p>
               <Notice message={message} />
               {report && (
                 <form
