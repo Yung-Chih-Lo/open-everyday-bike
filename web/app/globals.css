@@ -738,9 +738,9 @@ input[type="range"] {
 .detail-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; gap: 32px; }
 .detail-copy { padding: 28px; background: var(--card); border: 1px solid var(--border); border-radius: 24px; gap: 18px; }
 .detail-grade { font-size: 58px; }
-.detail-grade > span { max-width: 10em; line-height: 1.6; }
+.detail-grade .bike-link { line-height: 1.5; overflow-wrap: anywhere; }
 .score-summary { gap: 16px; padding: 18px 0; }
-.detail-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.detail-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .detail-actions > * { min-height: 44px; }
 .history-summary { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
 .history-summary h2 { font-size: 20px; }

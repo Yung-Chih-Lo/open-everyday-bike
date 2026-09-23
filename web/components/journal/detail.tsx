@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import {
@@ -60,7 +61,6 @@ export default function Detail() {
           <PageHeading
             eyebrow={`${numberLabel(data.record.id)} / ${data.record.content.riddenOn}`}
             title={data.record.content.shortComment}
-            description={data.record.content.city}
           />
           <div className="detail-layout">
             <div>
@@ -81,15 +81,20 @@ export default function Detail() {
               )}
             </div>
             <article className="detail-copy">
+              <div className="flex justify-end">
+                <Badge variant="secondary">{data.record.content.city}</Badge>
+              </div>
               <div className="detail-grade">
                 <div>
                   <OverallGrade value={data.record.content.overallGrade} />
                 </div>
-                <span>這一次的整體感受</span>
+                <Link
+                  className="bike-link"
+                  href={`/bikes/${data.record.bikeId}`}
+                >
+                  車號 {data.record.content.bikeNumber} ↗
+                </Link>
               </div>
-              <Link className="bike-link" href={`/bikes/${data.record.bikeId}`}>
-                車號 {data.record.content.bikeNumber} ↗
-              </Link>
               <dl className="score-summary">
                 {scoreLabels.map((label, i) => (
                   <div key={label}>
@@ -98,9 +103,14 @@ export default function Detail() {
                   </div>
                 ))}
               </dl>
-              <h2>騎乘筆記</h2>
+              <header className="flex flex-col gap-2">
+                <h2>騎乘筆記</h2>
+                <p className="muted text-sm">
+                  記錄者 {data.record.authorCode} ·{" "}
+                  {data.record.content.riddenOn.replaceAll("-", ".")}
+                </p>
+              </header>
               <p className="impression">{data.record.content.impression}</p>
-              <p className="muted">記錄者 / {data.record.authorCode}</p>
               <p className="muted text-sm">
                 歷史心得不代表車輛目前車況。每一次騎乘都可能有不同感受。
               </p>
@@ -124,7 +134,7 @@ export default function Detail() {
                   複製連結
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   aria-expanded={report}
                   aria-controls="report-form"
                   onClick={() => setReport((v) => !v)}

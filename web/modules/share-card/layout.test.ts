@@ -19,6 +19,8 @@ describe("share card", () => {
   it("keeps leading zero, escapes user text and uses independent grade", () => {
     const svg = shareCardSvg(1, { ...input, shortComment: "<script>&" })
     expect(svg).toContain("No.001")
+    expect(svg).not.toContain("單車紀錄")
+    expect(svg.match(/No\./g)).toHaveLength(1)
     expect(svg).toContain("0120297")
     expect(svg).toContain('A<tspan dy="-48" font-size="54">+</tspan>')
     expect(svg).toContain("&lt;script&gt;&amp;")

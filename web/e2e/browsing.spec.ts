@@ -67,6 +67,15 @@ for (const width of [390, 1280]) {
     // Click the footer whitespace, outside the title and photograph.
     await card.click({ position: { x: box.width - 12, y: box.height - 12 } })
     await expect(page).toHaveURL(/\/records\/1$/)
+    await expect(page.locator(".page-heading")).not.toContainText("新竹市")
+    await expect(page.locator(".detail-copy [data-slot=badge]")).toHaveText(
+      "新竹市"
+    )
+    await expect(page.locator(".detail-grade")).toContainText("車號 0123456")
+    await expect(page.getByText("這一次的整體感受")).toHaveCount(0)
+    await expect(page.locator(".detail-copy header")).toContainText(
+      "記錄者 RIDER123 · 2026.09.23"
+    )
     const actions = page.getByLabel("紀錄操作")
     await expect(
       actions.getByRole("link", { name: "下載分享圖 ↓" })
