@@ -58,7 +58,7 @@ export function RideLocation({
           role="combobox"
           aria-expanded={open}
           aria-controls={listId}
-          aria-label="騎乘地"
+          aria-label="騎乘縣市"
           className="w-full justify-between"
         >
           {value || "請選擇縣市"}

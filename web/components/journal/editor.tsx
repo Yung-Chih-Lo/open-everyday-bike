@@ -1,5 +1,6 @@
 "use client"
 /* eslint-disable @next/next/no-img-element -- Images are server-sized assets or local blob/SVG previews; avoid a second optimizer and preserve authenticated access. */
+import { overallGrades } from "@/modules/records/types"
 import { OverallGrade } from "./overall-grade"
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -228,7 +229,7 @@ export function Editor({ record }: { record?: RecordView }) {
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="city">騎乘地</FieldLabel>
+                <FieldLabel htmlFor="city">騎乘縣市</FieldLabel>
                 <RideLocation
                   value={value.city}
                   onChange={(city) => {
@@ -236,9 +237,6 @@ export function Editor({ record }: { record?: RecordView }) {
                     setRequestId("")
                   }}
                 />
-                <FieldDescription>
-                  搜尋並選擇縣市，不需填寫行政區或站點。
-                </FieldDescription>
               </Field>
             </div>
             <Field>
@@ -284,7 +282,7 @@ export function Editor({ record }: { record?: RecordView }) {
                           value={String(n)}
                           aria-label={`${label} ${grade(n)}`}
                         >
-                          {grade(n)}
+                          <OverallGrade value={grade(n)} />
                         </ToggleGroupItem>
                       ))}
                     </ToggleGroup>
@@ -306,8 +304,13 @@ export function Editor({ record }: { record?: RecordView }) {
                     change("overallGrade", next as RideInput["overallGrade"])
                 }}
               >
-                {["E", "D", "C", "B", "B+", "A", "A+"].map((g) => (
-                  <ToggleGroupItem key={g} value={g} aria-label={`總評 ${g}`}>
+                {overallGrades.map((g) => (
+                  <ToggleGroupItem
+                    key={g}
+                    value={g}
+                    aria-label={`總評 ${g}`}
+                    data-grade={g}
+                  >
                     <span>
                       <OverallGrade value={g} />
                     </span>
@@ -315,7 +318,7 @@ export function Editor({ record }: { record?: RecordView }) {
                 ))}
               </ToggleGroup>
               <FieldDescription>
-                這是你的整體感受，不是六項分數的平均。
+                這是你的整體感受，不是六項分數的平均。SSR：傳說中的神車，這次真的騎到賺到。
               </FieldDescription>
             </Field>
             <Field>

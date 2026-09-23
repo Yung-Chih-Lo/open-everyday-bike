@@ -1,6 +1,7 @@
+import { gradeColors } from "../records/types"
 import type { RideInput } from "../records/types"
 export const CARD_SIZE = 1080
-export const TEMPLATE_VERSION = 3
+export const TEMPLATE_VERSION = 4
 export const SCORE_LABELS = ["推進", "整潔", "操控", "車況", "感應", "機動"]
 const escape = (value: unknown) =>
   String(value).replace(
@@ -56,5 +57,5 @@ export function shareCardSvg(id: number | string, input: RideInput): string {
     out[n] = (out[n] ?? "") + c
     return out
   }, [])
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080"><defs><linearGradient id="shade" x2="0" y2="1"><stop stop-color="#000" stop-opacity=".36"/><stop offset=".45" stop-color="#000" stop-opacity=".03"/><stop offset="1" stop-color="#000" stop-opacity=".9"/></linearGradient></defs><rect width="1080" height="1080" fill="url(#shade)"/><g fill="white" font-family="Noto Sans TC, sans-serif"><text x="42" y="68" font-size="44" font-weight="800">No.${escape(String(id).padStart(3, "0"))}</text><text x="42" y="108" font-size="28">${escape(input.bikeNumber)}</text><text x="1038" y="65" text-anchor="end" font-size="28">${escape(input.riddenOn.replaceAll("-", "."))}</text>${radarSvg(input.scores)}<text x="600" y="945" font-size="108" font-weight="800">${escape(input.overallGrade[0])}${input.overallGrade.endsWith("+") ? '<tspan dy="-48" font-size="54">+</tspan>' : ""}</text>${lines.map((line, i) => `<text x="770" y="${860 + i * 36}" font-size="27">${escape(line)}</text>`).join("")}</g><rect y="1065" width="1080" height="15" fill="#facc15"/></svg>`
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080"><defs><linearGradient id="shade" x2="0" y2="1"><stop stop-color="#000" stop-opacity=".36"/><stop offset=".45" stop-color="#000" stop-opacity=".03"/><stop offset="1" stop-color="#000" stop-opacity=".9"/></linearGradient></defs><rect width="1080" height="1080" fill="url(#shade)"/><g fill="white" font-family="Noto Sans TC, sans-serif"><text x="42" y="68" font-size="44" font-weight="800">No.${escape(String(id).padStart(3, "0"))}</text><text x="42" y="108" font-size="28">${escape(input.bikeNumber)}</text><text x="1038" y="65" text-anchor="end" font-size="28">${escape(input.riddenOn.replaceAll("-", "."))}</text>${radarSvg(input.scores)}${input.overallGrade === "SSR" ? '<g transform="translate(642 827) scale(1.2)"><path d="M24 0C31 20 45 22 45 39A23 23 0 0 1 0 39C0 25 12 19 14 9C16 22 22 25 24 0Z" fill="#ef4428"/><path d="M24 26C25 37 34 38 32 46A10 10 0 0 1 12 44C12 38 20 34 24 26Z" fill="#ffd36a"/></g>' : ""}<text x="600" y="945" font-size="${input.overallGrade === "SSR" ? 65 : 108}" font-weight="800" fill="${gradeColors[input.overallGrade].bright}">${escape(input.overallGrade === "SSR" ? "SSR" : input.overallGrade[0])}${input.overallGrade.endsWith("+") ? '<tspan dy="-48" font-size="54">+</tspan>' : ""}</text>${lines.map((line, i) => `<text x="770" y="${860 + i * 36}" font-size="27">${escape(line)}</text>`).join("")}</g><rect y="1065" width="1080" height="15" fill="#facc15"/></svg>`
 }

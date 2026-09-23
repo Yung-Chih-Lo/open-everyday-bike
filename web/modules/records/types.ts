@@ -7,6 +7,26 @@ export const scoreLabels = [
   "感應",
   "機動",
 ] as const
+export const overallGrades = [
+  "E",
+  "D",
+  "C",
+  "B",
+  "B+",
+  "A",
+  "A+",
+  "SSR",
+] as const
+export const gradeColors: Record<string, { ink: string; bright: string }> = {
+  E: { ink: "#59616a", bright: "#cbd5e1" },
+  D: { ink: "#855719", bright: "#f5cb83" },
+  C: { ink: "#247047", bright: "#86efac" },
+  B: { ink: "#2366a3", bright: "#93c5fd" },
+  "B+": { ink: "#4f57b4", bright: "#b4baff" },
+  A: { ink: "#7d3daf", bright: "#d8b4fe" },
+  "A+": { ink: "#aa3178", bright: "#f9a8d4" },
+  SSR: { ink: "#c53020", bright: "#ff9866" },
+}
 export const rideSchema = z.object({
   bikeNumber: z
     .string()
@@ -24,7 +44,7 @@ export const rideSchema = z.object({
   city: z.string().trim().min(1).max(30),
   location: z.string().trim().max(120),
   scores: z.array(z.number().int().min(1).max(5).nullable()).length(6),
-  overallGrade: z.enum(["E", "D", "C", "B", "B+", "A", "A+"]),
+  overallGrade: z.enum(overallGrades),
   impression: z.string().trim().max(2000),
   shortComment: z.string().trim().max(40),
   cropX: z.number().min(0).max(1).default(0.5),

@@ -515,12 +515,7 @@ h2 {
   align-items: center;
   gap: 24px;
 }
-.detail-grade span {
-  font-size: 12px;
-  color: var(--muted-foreground);
-  font-weight: 400;
-  letter-spacing: 0.05em;
-}
+
 .bike-link {
   font-size: 19px;
   font-weight: 700;
@@ -778,3 +773,12 @@ input[type="range"] {
   .record-card, .record-photo img { transition: none; }
   .record-card:hover { transform: none; }
 }
+
+.rating-grade { color: var(--grade-ink, currentColor); white-space: nowrap; }
+.dark .rating-grade { color: var(--grade-bright, currentColor); }
+.rating-grade[data-grade="SSR"] { font-size: .65em; font-weight: 850; text-shadow: 0 0 12px color-mix(in srgb, var(--grade-bright) 30%, transparent); }
+.rating-flame { font-size: .8em; margin-right: .12em; }
+[data-slot="toggle-group-item"][data-grade="SSR"] .rating-grade { font-size: 1em; }
+[data-slot="toggle-group-item"][data-grade="SSR"][data-state="on"] { background: #ffe5dc; border-color: #c53020; box-shadow: 0 0 10px #ff986640; }
+.grade-stamp:has([data-grade="SSR"]) { width: 68px; background: #ffe5dc; }
+.grade-stamp .rating-grade { color: var(--grade-ink); }

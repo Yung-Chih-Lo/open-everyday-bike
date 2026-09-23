@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest"
 import { shareCardSvg, radarSvg } from "./layout"
 import { renderShareCard } from "./index"
 import sharp from "sharp"
+import { rideSchema, overallGrades, gradeColors } from "../records/types"
 import type { RideInput } from "../records/types"
 const input: RideInput = {
   bikeNumber: "0120297",
@@ -53,4 +54,27 @@ describe("share card", () => {
     expect(info.height).toBe(1080)
     expect(info.format).toBe("jpeg")
   })
+})
+
+it("accepts and renders SSR in full while keeping six scores bounded to A", async () => {
+  const ssr = { ...input, overallGrade: "SSR" as const }
+  expect(rideSchema.parse(ssr).overallGrade).toBe("SSR")
+  expect(
+    rideSchema.safeParse({ ...ssr, scores: [6, 5, 5, 5, 5, 5] }).success
+  ).toBe(false)
+  const svg = shareCardSvg(1, ssr)
+  expect(svg).toContain(">SSR</text>")
+  expect(svg).toContain('fill="#ef4428"')
+  expect(svg).toContain(`fill="${gradeColors.SSR.bright}"`)
+  for (const g of overallGrades)
+    expect(shareCardSvg(1, { ...input, overallGrade: g })).toContain(
+      `fill="${gradeColors[g].bright}"`
+    )
+  const mother = await sharp({
+    create: { width: 1080, height: 1080, channels: 3, background: "#333" },
+  })
+    .jpeg()
+    .toBuffer()
+  const rendered = await renderShareCard(1, ssr, mother)
+  expect((await sharp(rendered).metadata()).width).toBe(1080)
 })

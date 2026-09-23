@@ -97,7 +97,15 @@ export default function Detail() {
                 {scoreLabels.map((label, i) => (
                   <div key={label}>
                     <dt>{label}</dt>
-                    <dd>{grade(data.record.content.scores[i])}</dd>
+                    <dd>
+                      {data.record.content.scores[i] === null ? (
+                        "未評"
+                      ) : (
+                        <OverallGrade
+                          value={grade(data.record.content.scores[i])}
+                        />
+                      )}
+                    </dd>
                   </div>
                 ))}
               </dl>
