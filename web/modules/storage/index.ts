@@ -3,7 +3,12 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
+  HeadBucketCommand,
+  CreateBucketCommand,
+  GetBucketPolicyCommand,
+  PutBucketPolicyCommand,
 } from "@aws-sdk/client-s3"
+import { AppError } from "@/infra/security"
 export type Visibility = "private" | "public"
 export interface ObjectStorage {
   put(
@@ -38,8 +43,76 @@ export function createS3Storage(): ObjectStorage {
     public: required("S3_PUBLIC_BUCKET"),
   }
   const base = required("ASSET_PUBLIC_BASE_URL").replace(/\/$/, "")
+  if (buckets.private === buckets.public)
+    throw new Error("Private and public storage buckets must be different")
+  let ready: Promise<void> | undefined
+  async function initialize() {
+    for (const bucket of Object.values(buckets)) {
+      try {
+        await client.send(new HeadBucketCommand({ Bucket: bucket }))
+      } catch (error) {
+        if (
+          (error as { $metadata?: { httpStatusCode?: number } }).$metadata
+            ?.httpStatusCode !== 404
+        )
+          throw error
+        try {
+          await client.send(new CreateBucketCommand({ Bucket: bucket }))
+        } catch (error) {
+          // Another application instance may have created it after our check.
+          if ((error as Error).name !== "BucketAlreadyOwnedByYou") throw error
+        }
+      }
+    }
+    let policy: { Version: string; Statement: Record<string, unknown>[] } = {
+      Version: "2012-10-17",
+      Statement: [],
+    }
+    try {
+      const result = await client.send(
+        new GetBucketPolicyCommand({ Bucket: buckets.public })
+      )
+      if (result.Policy) policy = JSON.parse(result.Policy)
+    } catch (error) {
+      if ((error as Error).name !== "NoSuchBucketPolicy") throw error
+    }
+    const statement = {
+      Sid: "UbikePublicRead",
+      Effect: "Allow",
+      Principal: "*",
+      Action: "s3:GetObject",
+      Resource: `arn:aws:s3:::${buckets.public}/*`,
+    }
+    if (!Array.isArray(policy.Statement))
+      throw new Error("Invalid bucket policy")
+    const existing = policy.Statement.find((s) => s.Sid === statement.Sid)
+    if (JSON.stringify(existing) !== JSON.stringify(statement)) {
+      await client.send(
+        new PutBucketPolicyCommand({
+          Bucket: buckets.public,
+          Policy: JSON.stringify({
+            ...policy,
+            Statement: [
+              ...policy.Statement.filter((s) => s.Sid !== statement.Sid),
+              statement,
+            ],
+          }),
+        })
+      )
+    }
+  }
+  async function ensureReady() {
+    ready ??= initialize().catch((error) => {
+      ready = undefined
+      // Never log credentials, signed requests or raw provider responses.
+      console.error("storage_initialization_failed", (error as Error).name)
+      throw new AppError("圖片儲存空間初始化失敗，請稍後重試或聯絡管理員", 503)
+    })
+    await ready
+  }
   return {
     async put(key, body, visibility, contentType) {
+      await ensureReady()
       await client.send(
         new PutObjectCommand({
           Bucket: buckets[visibility],

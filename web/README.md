@@ -13,11 +13,12 @@ npm run db:migrate
 npm run dev
 ```
 
-在 `.env` 填入 MinIO endpoint、region、兩個 bucket、限定 bucket 權限的 access key / secret 與公開圖片 URL。沒有 S3 設定仍可開啟首頁，但無法完成投稿。MinIO 由部署者建立，本專案不會自動建置或改動 bucket 政策。
+在 `.env` 填入 MinIO endpoint、region、兩個 bucket、限定 bucket 權限的 access key / secret 與公開圖片 URL。沒有 S3 設定仍可開啟首頁，但無法完成投稿。MinIO 服務由部署者提供；程式在每個服務實例首次寫入圖片前檢查兩個 bucket，缺少時自動建立，不需要人工預建。初始化失敗會阻止上傳並回報錯誤，下次投稿會重試；403 或連線錯誤不會被當成 bucket 不存在。
 
-- 私有 bucket：禁止匿名存取，保存母圖與各版本私有備份。
-- 公開 bucket：僅允許匿名讀取物件，禁止匿名寫入與列舉。
-- `ASSET_PUBLIC_BASE_URL` 是公開 bucket 對外 URL，與 S3 API endpoint 分開。
+- 私有 bucket：新建時預設禁止匿名存取，保存母圖與各版本私有備份；已有 bucket 的政策不會被修改。兩個 bucket 必須使用不同名稱。
+- 應用程式憑證需具備這兩個 bucket 的檢查、建立及物件存取權限，以及公開 bucket 的讀取／更新政策權限。只授予物件上傳權限將無法完成初始化。
+- 公開 bucket：程式自動加入 `UbikePublicRead` 政策，僅授予匿名 `s3:GetObject`，保留其他政策。請使用本專案專用 bucket，勿另行授予匿名寫入或列舉。
+- `ASSET_PUBLIC_BASE_URL` 是公開 bucket 對外 URL，與 S3 API endpoint 分開。Zeabur 部署以服務環境變數為準，不讀開發機 `.env`；MinIO 通常設為 `https://<S3 公開網域>/<公開 bucket>`，不要使用 Console 網址或 localhost。
 - 後端傳送圖片，不需要瀏覽器 S3 CORS 或暴露 access key。
 - 建議公開媒體使用獨立網域。HTTP cache 最多 60 秒，避免下架後長期快取。
 - Cloudflare 前方的媒體快取規則需尊重這個 TTL；本版不串接 Cloudflare purge API。
