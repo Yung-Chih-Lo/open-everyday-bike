@@ -730,7 +730,12 @@ input[type="range"] {
   outline: 3px solid var(--ring);
   outline-offset: 4px;
 }
-.record-card .short-comment { overflow-wrap: anywhere; }
+.record-card .short-comment { overflow-wrap: anywhere; font-size: 16px; line-height: 1.7; }
+.record-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.record-card-heading [data-slot="card-title"] { font-size: 18px; font-weight: 650; overflow-wrap: anywhere; }
+.record-card-heading [data-slot="badge"] { flex-shrink: 0; }
+.record-card [data-slot="card-description"] { font-size: 12px; }
+.record-card [data-slot="card-footer"] { border-top: 1px solid var(--border); padding-top: 14px; margin-inline: 24px; padding-inline: 0; }
 .grade-stamp { display: flex; justify-content: center; align-items: baseline; padding-top: 10px; }
 .page-heading { padding: 32px 0 24px; max-width: 850px; }
 .page-heading h1 { margin-bottom: 8px; }
@@ -746,7 +751,7 @@ input[type="range"] {
 .score-summary > div:not(:nth-child(3n + 1)) { border-left: 1px solid var(--border); }
 .score-summary dt { font-size: 14px; }
 .score-summary dd { margin: 0; font-size: 24px; color: var(--foreground); }
-.detail-note-heading { display: flex; flex-direction: column; gap: 8px; }
+.detail-note-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: flex-start; gap: 8px 12px; }
 .detail-note-heading h2 { font-size: 17px; font-weight: 600; }
 .detail-note-heading p { font-size: 12px; overflow-wrap: anywhere; }
 .detail-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 4px; }

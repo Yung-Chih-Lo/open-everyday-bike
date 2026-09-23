@@ -130,22 +130,26 @@ export function RecordList({
             </span>
           </div>
           <CardHeader>
+            <div className="record-card-heading">
+              <CardTitle>
+                <Link
+                  className="record-card-link"
+                  href={
+                    manage && record.status !== "published"
+                      ? `/records/${record.id}/edit`
+                      : `/records/${record.id}`
+                  }
+                  aria-label={`查看車號 ${record.content.bikeNumber} 的紀錄 ${numberLabel(record.id)}`}
+                >
+                  車號 {record.content.bikeNumber}
+                </Link>
+              </CardTitle>
+              <Badge variant="secondary">{record.content.city}</Badge>
+            </div>
             <CardDescription>
-              {record.content.riddenOn} · {record.content.city}
+              {record.content.riddenOn.replaceAll("-", ".")} ·{" "}
+              {numberLabel(record.id)}
             </CardDescription>
-            <CardTitle>
-              <Link
-                className="record-card-link"
-                href={
-                  manage && record.status !== "published"
-                    ? `/records/${record.id}/edit`
-                    : `/records/${record.id}`
-                }
-                aria-label={`查看車號 ${record.content.bikeNumber} 的紀錄 ${numberLabel(record.id)}`}
-              >
-                車號 {record.content.bikeNumber}
-              </Link>
-            </CardTitle>
           </CardHeader>
           <CardContent className="flex-1">
             <p className="short-comment line-clamp-2">
@@ -166,7 +170,9 @@ export function RecordList({
                 </Link>
               </Button>
             ) : (
-              <span className="muted text-xs">{numberLabel(record.id)}</span>
+              <span className="muted text-xs" aria-hidden="true">
+                查看紀錄 ↗
+              </span>
             )}
             {manage && (
               <Badge variant="outline">
