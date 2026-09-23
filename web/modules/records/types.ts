@@ -46,7 +46,8 @@ export const rideSchema = z.object({
   scores: z.array(z.number().int().min(1).max(5).nullable()).length(6),
   overallGrade: z.enum(overallGrades),
   impression: z.string().trim().max(2000),
-  shortComment: z.string().trim().max(40),
+  shortComment: z.string().trim().max(20),
+  cropZoom: z.number().min(0.25).max(2).optional(),
   cropX: z.number().min(0).max(1).default(0.5),
   cropY: z.number().min(0).max(1).default(0.5),
 })

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { shareCardSvg, radarSvg } from "./layout"
+import { shareCardSvg, radarSvg, photoPlacement } from "./layout"
 import { renderShareCard } from "./index"
 import sharp from "sharp"
 import { rideSchema, overallGrades, gradeColors } from "../records/types"
@@ -77,4 +77,68 @@ it("accepts and renders SSR in full while keeping six scores bounded to A", asyn
     .toBuffer()
   const rendered = await renderShareCard(1, ssr, mother)
   expect((await sharp(rendered).metadata()).width).toBe(1080)
+})
+
+it("allows an empty short comment and caps it at twenty characters", () => {
+  for (const shortComment of ["", "好".repeat(20)]) {
+    expect(rideSchema.safeParse({ ...input, shortComment }).success).toBe(true)
+  }
+  expect(
+    rideSchema.safeParse({ ...input, shortComment: "好".repeat(21) }).success
+  ).toBe(false)
+  expect(shareCardSvg(1, { ...input, shortComment: "" })).toContain("No.001")
+})
+
+it("matches photo placement for fit, shrink, zoom and edge alignment", () => {
+  expect(photoPlacement(1600, 800, 1080, input)).toEqual({
+    width: 2160,
+    height: 1080,
+    left: -540,
+    top: 0,
+  })
+  expect(photoPlacement(1600, 800, 1080, { ...input, cropZoom: 0.5 })).toEqual({
+    width: 1080,
+    height: 540,
+    left: 0,
+    top: 270,
+  })
+  expect(
+    photoPlacement(800, 1600, 1080, {
+      ...input,
+      cropZoom: 2,
+      cropX: 1,
+      cropY: 0,
+    })
+  ).toEqual({ width: 2160, height: 4320, left: -1080, top: 0 })
+  expect(rideSchema.safeParse({ ...input, cropZoom: 0 }).success).toBe(false)
+  expect(rideSchema.safeParse({ ...input, cropZoom: 2.1 }).success).toBe(false)
+})
+it("renders zoomed-out photos with padding and zoomed-in photos without padding", async () => {
+  const photo = await sharp({
+    create: { width: 1600, height: 800, channels: 3, background: "#ff0000" },
+  })
+    .jpeg()
+    .toBuffer()
+  for (const cropZoom of [0.25, 1, 2]) {
+    const card = await renderShareCard(
+      1,
+      { ...input, cropZoom, shortComment: "" },
+      photo
+    )
+    const { data, info } = await sharp(card)
+      .raw()
+      .toBuffer({ resolveWithObject: true })
+    const pixel = (x: number, y: number) =>
+      Array.from(
+        data.subarray(
+          (y * info.width + x) * info.channels,
+          (y * info.width + x) * info.channels + 3
+        )
+      )
+    const center = pixel(540, 500),
+      edge = pixel(10, 500)
+    expect(center[0]).toBeGreaterThan(center[1] * 2)
+    if (cropZoom === 0.25) expect(Math.abs(edge[0] - edge[1])).toBeLessThan(15)
+    else expect(edge[0]).toBeGreaterThan(edge[1] * 2)
+  }
 })

@@ -60,7 +60,7 @@ export default function Detail() {
         <>
           <PageHeading
             eyebrow={`${numberLabel(data.record.id)} / ${data.record.content.riddenOn}`}
-            title={data.record.content.shortComment}
+            title={data.record.content.shortComment || "騎乘紀錄"}
           />
           <div className="detail-layout">
             <div>

@@ -14,7 +14,7 @@ import {
   FieldLabel,
   FieldDescription,
 } from "@/components/ui/field"
-import { shareCardSvg } from "@/modules/share-card/layout"
+import { shareCardSvg, photoPlacement } from "@/modules/share-card/layout"
 import {
   Notice,
   PageHeading,
@@ -48,6 +48,13 @@ export function Editor({ record }: { record?: RecordView }) {
   const [photoError, setPhotoError] = useState("")
   const [photo, setPhoto] = useState<File | null>(null)
   const [preview, setPreview] = useState(record?.imageUrl || "")
+  const [photoSize, setPhotoSize] = useState({ width: 1080, height: 1080 })
+  const placement = photoPlacement(
+    photoSize.width,
+    photoSize.height,
+    1080,
+    value
+  )
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState("")
   const [recovery, setRecovery] = useState("")
@@ -318,21 +325,20 @@ export function Editor({ record }: { record?: RecordView }) {
                 ))}
               </ToggleGroup>
               <FieldDescription>
-                這是你的整體感受，不是六項分數的平均。SSR：傳說中的神車，這次真的騎到賺到。
+                這是你的整體感受，不是六項分數的平均。
               </FieldDescription>
             </Field>
             <Field>
               <FieldLabel htmlFor="shortComment">03 / 一句短評</FieldLabel>
               <Input
                 id="shortComment"
-                required
-                maxLength={40}
+                maxLength={20}
                 value={value.shortComment}
                 placeholder="這次騎乘，最想說的一句話"
                 onChange={(e) => change("shortComment", e.target.value)}
               />
               <FieldDescription>
-                {value.shortComment.length} / 40 字，會出現在分享圖上。
+                {value.shortComment.length} / 20 字，選填，會出現在分享圖上。
               </FieldDescription>
             </Field>
             <Field>
@@ -407,8 +413,17 @@ export function Editor({ record }: { record?: RecordView }) {
                 className="preview-photo"
                 src={preview}
                 alt="照片裁切預覽"
+                onLoad={(e) =>
+                  setPhotoSize({
+                    width: e.currentTarget.naturalWidth,
+                    height: e.currentTarget.naturalHeight,
+                  })
+                }
                 style={{
-                  objectPosition: `${value.cropX * 100}% ${value.cropY * 100}%`,
+                  width: `${placement.width / 10.8}%`,
+                  height: `${placement.height / 10.8}%`,
+                  left: `${placement.left / 10.8}%`,
+                  top: `${placement.top / 10.8}%`,
                 }}
               />
             )}
@@ -419,6 +434,34 @@ export function Editor({ record }: { record?: RecordView }) {
             />
           </div>
           <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="cropZoom">
+                照片縮放 · {Math.round((value.cropZoom ?? 1) * 100)}%
+              </FieldLabel>
+              <input
+                id="cropZoom"
+                type="range"
+                min="0.25"
+                max="2"
+                step="0.01"
+                value={value.cropZoom ?? 1}
+                onChange={(e) => change("cropZoom", Number(e.target.value))}
+              />
+              <FieldDescription>
+                縮小可顯示更多照片，留白會以深色填滿；放大可裁切細節。
+              </FieldDescription>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  change("cropZoom", 1)
+                  change("cropX", 0.5)
+                  change("cropY", 0.5)
+                }}
+              >
+                重設照片位置與縮放
+              </Button>
+            </Field>
             <Field>
               <FieldLabel htmlFor="cropX">照片水平位置</FieldLabel>
               <input

@@ -3,7 +3,7 @@ import path from "node:path"
 import fs from "node:fs"
 import os from "node:os"
 import type { RideInput } from "../records/types"
-import { shareCardSvg } from "./layout"
+import { shareCardSvg, photoPlacement } from "./layout"
 let configured = false
 function configureFont() {
   if (configured) return
@@ -24,17 +24,53 @@ export async function renderShareCard(
 ): Promise<Buffer> {
   configureFont()
   const meta = await sharp(mother).metadata()
-  const side = Math.min(meta.width!, meta.height!)
-  const left = Math.round(
-    (meta.width! - side) * Math.max(0, Math.min(1, input.cropX))
+  const placement = photoPlacement(meta.width!, meta.height!, 1080, input)
+  const left = Math.max(0, placement.left),
+    top = Math.max(0, placement.top)
+  const width = Math.min(1080, placement.left + placement.width) - left
+  const height = Math.min(1080, placement.top + placement.height) - top
+  const sourceLeft = Math.max(
+    0,
+    Math.min(
+      meta.width! - 1,
+      Math.round(((left - placement.left) / placement.width) * meta.width!)
+    )
   )
-  const top = Math.round(
-    (meta.height! - side) * Math.max(0, Math.min(1, input.cropY))
+  const sourceTop = Math.max(
+    0,
+    Math.min(
+      meta.height! - 1,
+      Math.round(((top - placement.top) / placement.height) * meta.height!)
+    )
   )
-  return sharp(mother)
-    .extract({ left, top, width: side, height: side })
-    .resize(1080, 1080)
-    .composite([{ input: Buffer.from(shareCardSvg(id, input)) }])
+  const photo = await sharp(mother)
+    .extract({
+      left: sourceLeft,
+      top: sourceTop,
+      width: Math.max(
+        1,
+        Math.min(
+          meta.width! - sourceLeft,
+          Math.round((width / placement.width) * meta.width!)
+        )
+      ),
+      height: Math.max(
+        1,
+        Math.min(
+          meta.height! - sourceTop,
+          Math.round((height / placement.height) * meta.height!)
+        )
+      ),
+    })
+    .resize(width, height, { fit: "fill" })
+    .toBuffer()
+  return sharp({
+    create: { width: 1080, height: 1080, channels: 3, background: "#45483a" },
+  })
+    .composite([
+      { input: photo, left, top },
+      { input: Buffer.from(shareCardSvg(id, input)) },
+    ])
     .jpeg({ quality: 90 })
     .toBuffer()
 }
