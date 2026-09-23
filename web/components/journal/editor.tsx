@@ -450,17 +450,6 @@ export function Editor({ record }: { record?: RecordView }) {
               <FieldDescription>
                 縮小可顯示更多照片，留白會以深色填滿；放大可裁切細節。
               </FieldDescription>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  change("cropZoom", 1)
-                  change("cropX", 0.5)
-                  change("cropY", 0.5)
-                }}
-              >
-                重設照片位置與縮放
-              </Button>
             </Field>
             <Field>
               <FieldLabel htmlFor="cropX">照片水平位置</FieldLabel>
@@ -485,6 +474,19 @@ export function Editor({ record }: { record?: RecordView }) {
                 value={value.cropY}
                 onChange={(e) => change("cropY", Number(e.target.value))}
               />
+            </Field>
+            <Field>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  change("cropZoom", 1)
+                  change("cropX", 0.5)
+                  change("cropY", 0.5)
+                }}
+              >
+                重設照片位置與縮放
+              </Button>
             </Field>
           </FieldGroup>
           <p className="muted text-sm">
