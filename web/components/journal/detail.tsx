@@ -54,7 +54,7 @@ export default function Detail() {
   }
   return (
     <>
-      <Notice message={error || message} />
+      <Notice message={error} />
       {data ? (
         <>
           <PageHeading
@@ -79,30 +79,12 @@ export default function Detail() {
               ) : (
                 <Notice message="分享圖尚未完成，可至我的紀錄重試。" />
               )}
-              <div className="mt-4 flex flex-wrap gap-3">
-                {data.record.shareUrl && (
-                  <Button asChild>
-                    <a href={`/api/records/${id}/download`} download>
-                      下載分享圖 ↓
-                    </a>
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    navigator.clipboard.writeText(window.location.href).then(
-                      () => setMessage("紀錄連結已複製。"),
-                      () => setMessage("請複製瀏覽器網址分享。")
-                    )
-                  }
-                >
-                  複製連結
-                </Button>
-              </div>
             </div>
             <article className="detail-copy">
               <div className="detail-grade">
-                <div><OverallGrade value={data.record.content.overallGrade} /></div>
+                <div>
+                  <OverallGrade value={data.record.content.overallGrade} />
+                </div>
                 <span>這一次的整體感受</span>
               </div>
               <Link className="bike-link" href={`/bikes/${data.record.bikeId}`}>
@@ -122,11 +104,38 @@ export default function Detail() {
               <p className="muted text-sm">
                 歷史心得不代表車輛目前車況。每一次騎乘都可能有不同感受。
               </p>
-              <Button variant="ghost" onClick={() => setReport((v) => !v)}>
-                回報這筆紀錄
-              </Button>
+              <div className="detail-actions" aria-label="紀錄操作">
+                {data.record.shareUrl && (
+                  <Button asChild>
+                    <a href={`/api/records/${id}/download`} download>
+                      下載分享圖 ↓
+                    </a>
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    navigator.clipboard.writeText(window.location.href).then(
+                      () => setMessage("紀錄連結已複製。"),
+                      () => setMessage("請複製瀏覽器網址分享。")
+                    )
+                  }
+                >
+                  複製連結
+                </Button>
+                <Button
+                  variant="ghost"
+                  aria-expanded={report}
+                  aria-controls="report-form"
+                  onClick={() => setReport((v) => !v)}
+                >
+                  回報這筆紀錄
+                </Button>
+              </div>
+              <Notice message={message} />
               {report && (
                 <form
+                  id="report-form"
                   onSubmit={(e) => {
                     e.preventDefault()
                     void reportRecord()

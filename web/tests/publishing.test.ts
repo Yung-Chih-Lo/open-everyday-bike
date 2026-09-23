@@ -10,6 +10,7 @@ import { checkModeration } from "@/modules/moderation"
 import {
   getRecord,
   listRecords,
+  bikeHistory,
   owned,
   completeAttempt,
   withdrawRecord,
@@ -413,5 +414,49 @@ describe("publishing with real SQLite and external seams", () => {
     ).rejects.toThrow("失效")
     expect(getRecord(original.id)?.content.shortComment).toBe("舒服")
     expect(p.media.revokeVersion).toHaveBeenCalledWith(original.id, 2)
+  })
+})
+
+it("paginates all public bike history with stable ordering and excludes hidden records", async () => {
+  const { contributor } = createIdentity()
+  const p = ports()
+  const ids: number[] = []
+  for (let i = 0; i < 26; i++) {
+    const r = await p.app.submit(
+      contributor.id,
+      input,
+      `page-${i}`,
+      Buffer.from("photo")
+    )
+    ids.push(r.id)
+  }
+  withdrawRecord(ids[25], "hidden")
+  const bikeId = getRecord(ids[0])!.bikeId
+  await p.app.submit(
+    contributor.id,
+    { ...input, bikeNumber: "9999999" },
+    "other-bike",
+    Buffer.from("photo")
+  )
+  const first = bikeHistory(bikeId, 1),
+    second = bikeHistory(bikeId, 2),
+    last = bikeHistory(bikeId, 999)
+  expect(first).toMatchObject({
+    total: 25,
+    page: 1,
+    pages: 3,
+    latestRiddenOn: input.riddenOn,
+  })
+  expect(first.records.map((r) => r.id)).toEqual(ids.slice(13, 25).reverse())
+  expect(second.records.map((r) => r.id)).toEqual(ids.slice(1, 13).reverse())
+  expect(last.records.map((r) => r.id)).toEqual([ids[0]])
+  expect(last.page).toBe(3)
+  expect(bikeHistory(bikeId, -1).page).toBe(1)
+  expect(bikeHistory(bikeId, NaN).page).toBe(1)
+  expect(bikeHistory(9999)).toMatchObject({
+    total: 0,
+    page: 1,
+    pages: 1,
+    records: [],
   })
 })

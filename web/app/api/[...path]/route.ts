@@ -123,11 +123,14 @@ async function handle(
       if (path[0] === "bikes" && path.length === 2) {
         const bike = getBike(id())
         if (!bike) throw new AppError("找不到車輛", 404)
+        const history = records.bikeHistory(
+          bike.id,
+          Number(req.nextUrl.searchParams.get("page") || 1)
+        )
         return json({
           bike,
-          records: records
-            .listRecords({ bikeId: bike.id })
-            .map((r) => publishing.decorate(r)),
+          ...history,
+          records: history.records.map((r) => publishing.decorate(r)),
         })
       }
       if (route === "admin" || route === "admin/settings") {

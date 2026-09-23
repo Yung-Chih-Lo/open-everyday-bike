@@ -60,6 +60,25 @@ export function listRecords(
       .all(...args) as Row[]
   ).map(view)
 }
+export function bikeHistory(bikeId: number, requestedPage = 1) {
+  const pageSize = 12
+  const summary = getSqlite()
+    .prepare(
+      "SELECT COUNT(*) AS total, MAX(json_extract(content,'$.riddenOn')) AS latestRiddenOn FROM ride_records WHERE bike_id=? AND status='published'"
+    )
+    .get(bikeId) as { total: number; latestRiddenOn: string | null }
+  const pages = Math.max(1, Math.ceil(summary.total / pageSize))
+  const page = Math.min(
+    pages,
+    Math.max(1, Number.isSafeInteger(requestedPage) ? requestedPage : 1)
+  )
+  const rows = getSqlite()
+    .prepare(
+      "SELECT * FROM ride_records WHERE bike_id=? AND status='published' ORDER BY json_extract(content,'$.riddenOn') DESC,id DESC LIMIT ? OFFSET ?"
+    )
+    .all(bikeId, pageSize, (page - 1) * pageSize) as Row[]
+  return { ...summary, page, pages, pageSize, records: rows.map(view) }
+}
 export function owned(id: number, authorId: string) {
   const r = getRecord(id)
   if (!r || r.authorId !== authorId || r.status === "deleted")

@@ -114,8 +114,8 @@ export function RecordList({
   return records.length ? (
     <div className="record-grid">
       {records.map((record) => (
-        <Card key={record.id} className="overflow-hidden">
-          <Link href={`/records/${record.id}`} className="record-photo">
+        <Card key={record.id} className="record-card relative gap-4 pt-0">
+          <div className="record-photo">
             {record.imageUrl ? (
               <img
                 src={record.imageUrl}
@@ -128,24 +128,39 @@ export function RecordList({
             <span className="grade-stamp">
               <OverallGrade value={record.content.overallGrade} />
             </span>
-          </Link>
+          </div>
           <CardHeader>
             <CardDescription>
               {record.content.riddenOn} · {record.content.city}
             </CardDescription>
             <CardTitle>
-              <Link href={`/records/${record.id}`}>
-                {record.content.bikeNumber}
+              <Link
+                className="record-card-link"
+                href={
+                  manage && record.status !== "published"
+                    ? `/records/${record.id}/edit`
+                    : `/records/${record.id}`
+                }
+                aria-label={`查看車號 ${record.content.bikeNumber} 的紀錄 ${numberLabel(record.id)}`}
+              >
+                車號 {record.content.bikeNumber}
               </Link>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="short-comment">{record.content.shortComment}</p>
+          <CardContent className="flex-1">
+            <p className="short-comment line-clamp-2">
+              {record.content.shortComment}
+            </p>
           </CardContent>
           <CardFooter className="flex flex-wrap justify-between gap-2">
-            <Badge variant="secondary">{record.authorCode}</Badge>
+            <span className="muted text-xs">記錄者 {record.authorCode}</span>
             {manage ? (
-              <Button asChild variant="outline" size="sm">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="relative z-10"
+              >
                 <Link href={`/records/${record.id}/edit`}>
                   {record.status === "published" ? "編輯" : "繼續填寫"}
                 </Link>

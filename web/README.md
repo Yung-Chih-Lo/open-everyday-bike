@@ -63,7 +63,7 @@ npm run admin:hash
 - 管理：`admin/login`、`admin/logout`、`admin/actions`；`PATCH /api/admin/settings`、`POST /api/admin/test`。
 - `GET /api/health`：SQLite 連線檢查，不洩漏設定。
 
-寫入必須帶同源 Origin。列表每次最多 100 筆，初版無分頁介面。聯絡信箱為 ycl1006.project@gmail.com，請附紀錄編號。
+寫入必須帶同源 Origin。車號歷史以 `?page=1` 分頁，每頁 12 筆，回傳總筆數與頁數；首頁與管理列表每次最多 100 筆。聯絡信箱為 ycl1006.project@gmail.com，請附紀錄編號。
 
 ## 備份與還原
 
